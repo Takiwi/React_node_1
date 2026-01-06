@@ -1,6 +1,10 @@
 import userModel from "../models/user.model";
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
+import RefreshTokenService from "./refreshToken.service";
+import { createTokenPair } from "../auth/authUtils";
+import { getInfoData } from "../utils";
+import { publicKey, privateKey } from "../utils/readKey";
 
 const RoleUser = {
   USER: "USER",
@@ -39,27 +43,37 @@ class AccessService {
       });
 
       if (newUser) {
-        // created private/public key
-        const { publicKey, privateKey } = crypto.generateKeyPairSync(
-          "rsa" as any,
-          {
-            modulesLength: 4096,
-            publicKeyEncoding: {
-              type: "spki",
-              format: "pem",
-            },
-            privateKeyEncoding: {
-              type: "pkcs8",
-              format: "pem",
-            },
-          }
+        // create token pair
+        const tokens = await createTokenPair(
+          { userId: newUser._id, email },
+          privateKey
         );
-        console.log({ publicKey, privateKey });
+
+        const tokenHolder = await RefreshTokenService.saveRefreshToken({
+          userId: newUser._id.toString(),
+          refreshToken: tokens?.refreshToken,
+        });
+
+        return {
+          code: 201,
+          metadata: {
+            user: getInfoData({
+              fields: ["_id", "username", "email"],
+              object: newUser,
+            }),
+            tokens,
+          },
+        };
       }
+
+      return {
+        code: "200",
+        metadata: null,
+      };
     } catch (error) {
       return {
         code: "xxx",
-        message: "" + error,
+        message: "1 - " + error,
         status: "error",
       };
     }

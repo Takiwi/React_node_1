@@ -8,6 +8,10 @@ config();
 
 const app = express();
 
+// init middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // init databases
 Database.getInstance();
 
