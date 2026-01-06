@@ -28,9 +28,9 @@ const userSchema = new Schema(
     },
     verify: {
       type: Schema.Types.Boolean,
-      default: true,
+      default: false,
     },
-    role: {
+    roles: {
       type: Array,
       default: [],
     },
