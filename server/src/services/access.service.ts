@@ -1,6 +1,5 @@
 import userModel from "../models/user.model";
 import bcrypt from "bcrypt";
-import crypto from "node:crypto";
 import RefreshTokenService from "./refreshToken.service";
 import { createTokenPair } from "../auth/authUtils";
 import { getInfoData } from "../utils";
@@ -53,6 +52,13 @@ class AccessService {
           userId: newUser._id.toString(),
           refreshToken: tokens?.refreshToken,
         });
+
+        if (!tokenHolder) {
+          return {
+            code: 200,
+            metadata: null,
+          };
+        }
 
         return {
           code: 201,

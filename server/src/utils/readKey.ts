@@ -1,7 +1,12 @@
 import fs from "fs";
+import path from "path";
 
-const publicKey = fs.readFileSync("../keys/public.pem", { encoding: "utf-8" });
-const privateKey = fs.readFileSync("../keys/private.pem", {
+const filePath = path.resolve(__dirname, "../keys");
+
+const publicKey = fs.readFileSync(filePath + "/public.pem", {
+  encoding: "utf-8",
+});
+const privateKey = fs.readFileSync(filePath + "/private.pem", {
   encoding: "utf-8",
 });
 
