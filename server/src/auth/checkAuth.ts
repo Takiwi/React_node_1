@@ -50,4 +50,10 @@ const checkPermission = (permission: string) => {
   };
 };
 
-export { apiKey, checkPermission };
+const asyncHandler = (fn: Function) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    fn(req, res, next).catch(next);
+  };
+};
+
+export { apiKey, checkPermission, asyncHandler };

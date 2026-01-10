@@ -4,6 +4,7 @@ import RefreshTokenService from "./refreshToken.service";
 import { createTokenPair } from "../auth/authUtils";
 import { getInfoData } from "../utils";
 import { publicKey, privateKey } from "../utils/readKey";
+import { BadRequestError } from "../core/error.response";
 
 const RoleUser = {
   USER: "USER",
@@ -26,10 +27,7 @@ class AccessService {
       const holder = await userModel.findOne({ email }).lean();
 
       if (holder) {
-        return {
-          code: "xxxx",
-          message: "User already registered!",
-        };
+        throw new BadRequestError("Error: User is already registered!");
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
