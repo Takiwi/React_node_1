@@ -9,15 +9,28 @@ class RefreshTokenService {
     refreshToken: string;
   }) => {
     try {
-      const tokens = await refreshTokenSchema.create({
-        userId,
-        refresh_token: refreshToken,
-      });
+      const filter = { user: userId },
+        update = { refreshTokensUsed: [], refreshToken },
+        options = { upsert: true, new: true };
 
-      return tokens ? tokens.userId : null;
+      const tokens = await refreshTokenSchema.findByIdAndUpdate(
+        filter,
+        update,
+        options
+      );
+
+      return tokens ? tokens._id : null;
     } catch (error) {
       console.log(error);
     }
+  };
+
+  static findByUserId = async (id: string) => {
+    return await refreshTokenSchema.findOne({ userId: id }).lean();
+  };
+
+  static removeByRefreshToken = async (id: string) => {
+    return await refreshTokenSchema.findOneAndDelete();
   };
 }
 

@@ -3,8 +3,9 @@ import bcrypt from "bcrypt";
 import RefreshTokenService from "./refreshToken.service";
 import { createTokenPair } from "../auth/authUtils";
 import { getInfoData } from "../utils";
-import { publicKey, privateKey } from "../utils/readKey";
-import { BadRequestError } from "../core/error.response";
+import { privateKey } from "../utils/readKey";
+import { AuthFailureError, BadRequestError } from "../core/error.response";
+import { findByEmail } from "./user.service";
 
 const RoleUser = {
   USER: "USER",
@@ -14,6 +15,55 @@ const RoleUser = {
 };
 
 class AccessService {
+  static logout = async (refreshToken: string | undefined) => {
+    if (refreshToken) {
+      await RefreshTokenService.removeByRefreshToken(refreshToken);
+    }
+
+    return {
+      user: getInfoData({
+        fields: ["_id", "username", "email"],
+        object: {},
+      }),
+    };
+  };
+
+  static login = async ({
+    email,
+    password,
+    refreshToken = null,
+  }: {
+    email: string;
+    password: string;
+    refreshToken: string | null;
+  }) => {
+    const foundUser = await findByEmail(email);
+
+    if (!foundUser) throw new BadRequestError("User not registered!");
+
+    const match = bcrypt.compare(password, foundUser.password);
+
+    if (!match) throw new AuthFailureError("Authentication error");
+
+    const tokens = await createTokenPair(
+      { userId: foundUser._id, email },
+      privateKey
+    );
+
+    await RefreshTokenService.saveRefreshToken({
+      userId: foundUser._id.toString(),
+      refreshToken: tokens?.refreshToken,
+    });
+
+    return {
+      user: getInfoData({
+        fields: ["_id", "username", "email"],
+        object: foundUser,
+      }),
+      tokens,
+    };
+  };
+
   static register = async ({
     username,
     email,

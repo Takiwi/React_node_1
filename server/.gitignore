@@ -1,2 +1,6 @@
-.env
 *.pem
+node_modules/
+.env
+logs/
+coverage/
+*.log

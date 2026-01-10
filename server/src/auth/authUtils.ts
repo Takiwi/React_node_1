@@ -1,8 +1,19 @@
 import JWT from "jsonwebtoken";
-import { KeyObject } from "node:crypto";
+import { asyncHandler } from "../helpers/asyncHandler";
+import { NextFunction, Request, Response } from "express";
+import { AuthFailureError, NotFoundError } from "../core/error.response";
+import RefreshTokenService from "../services/refreshToken.service";
+import { publicKey, privateKey } from "../utils/readKey";
+import { AccessTokenPayload } from "../types/payload";
+
+const HEADER = {
+  API_KEY: "x-api-key",
+  CLIENT_ID: "x-client-id",
+  AUTHORIZATION: "authorization",
+};
 
 const createTokenPair = async (
-  payload: Record<string, unknown>,
+  payload: AccessTokenPayload,
   privateKey: string
 ) => {
   try {
@@ -24,4 +35,29 @@ const createTokenPair = async (
   }
 };
 
-export { createTokenPair };
+const authentication = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.get(HEADER.CLIENT_ID);
+    if (!userId) throw new AuthFailureError("Invalid Request");
+
+    const accessToken = req.get(HEADER.AUTHORIZATION);
+    if (!accessToken) throw new AuthFailureError("Invalid Request");
+
+    try {
+      const decodeUser = JWT.verify(accessToken, publicKey);
+      if (typeof decodeUser === "string")
+        throw new AuthFailureError("Invalid Request");
+
+      const payload = decodeUser as AccessTokenPayload;
+
+      if (userId !== payload.userId)
+        throw new AuthFailureError("Invalid Request");
+
+      return next();
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export { createTokenPair, authentication };

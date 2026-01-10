@@ -1,12 +1,5 @@
-const StatusCode = {
-  FORBIDDEN: 403,
-  CONFLICT: 409,
-};
+import { StatusCodes, ReasonPhrases } from "../utils/httpStatusCode";
 
-const ReasonStatusCode = {
-  FORBIDDEN: "Bad request error",
-  CONFLICT: "Conflict error",
-};
 class ErrorResponse extends Error {
   constructor(message: string, status: number) {
     super(message);
@@ -16,8 +9,8 @@ class ErrorResponse extends Error {
 
 class ConflictResponseError extends ErrorResponse {
   constructor(
-    message: string = ReasonStatusCode.CONFLICT,
-    statusCode: number = StatusCode.CONFLICT
+    message = ReasonPhrases.CONFLICT,
+    statusCode = StatusCodes.CONFLICT
   ) {
     super(message, statusCode);
   }
@@ -25,11 +18,34 @@ class ConflictResponseError extends ErrorResponse {
 
 class BadRequestError extends ErrorResponse {
   constructor(
-    message: string = ReasonStatusCode.CONFLICT,
-    statusCode: number = StatusCode.CONFLICT
+    message = ReasonPhrases.CONFLICT,
+    statusCode = StatusCodes.CONFLICT
   ) {
     super(message, statusCode);
   }
 }
 
-export { ConflictResponseError, BadRequestError };
+class AuthFailureError extends ErrorResponse {
+  constructor(
+    message = ReasonPhrases.UNAUTHORIZED,
+    statusCode = StatusCodes.UNAUTHORIZED
+  ) {
+    super(message, statusCode);
+  }
+}
+
+class NotFoundError extends ErrorResponse {
+  constructor(
+    message = ReasonPhrases.NOT_FOUND,
+    statusCode = StatusCodes.NOT_FOUND
+  ) {
+    super(message, statusCode);
+  }
+}
+
+export {
+  ConflictResponseError,
+  BadRequestError,
+  AuthFailureError,
+  NotFoundError,
+};

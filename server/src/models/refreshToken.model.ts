@@ -10,9 +10,13 @@ const refreshTokenSchema = new Schema(
       required: true,
       ref: "User",
     },
-    refresh_token: {
+    refreshToken: {
       type: String,
-      unique: true,
+      required: true,
+    },
+    refreshTokensUsed: {
+      type: Array,
+      default: [],
     },
   },
   {
