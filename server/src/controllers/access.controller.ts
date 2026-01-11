@@ -3,6 +3,17 @@ import AccessService from "../services/access.service";
 import { CREATED, OK, SuccessResponse } from "../core/success.response";
 
 class AccessController {
+  handlerRefreshToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    new SuccessResponse({
+      message: "Get token success",
+      metadata: await AccessService.handlerRefreshToken(req.refreshToken),
+    }).send(res);
+  };
+
   logout = async (req: Request, res: Response, next: NextFunction) => {
     new SuccessResponse({
       message: "Logout success",

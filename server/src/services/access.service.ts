@@ -1,11 +1,16 @@
 import userModel from "../models/user.model";
 import bcrypt from "bcrypt";
 import RefreshTokenService from "./refreshToken.service";
-import { createTokenPair } from "../auth/authUtils";
+import { createTokenPair, verifyJWT } from "../auth/authUtils";
 import { getInfoData } from "../utils";
 import { privateKey } from "../utils/readKey";
-import { AuthFailureError, BadRequestError } from "../core/error.response";
+import {
+  AuthFailureError,
+  BadRequestError,
+  ForbiddenError,
+} from "../core/error.response";
 import { findByEmail } from "./user.service";
+import { JwtPayload } from "jsonwebtoken";
 
 const RoleUser = {
   USER: "USER",
@@ -15,6 +20,61 @@ const RoleUser = {
 };
 
 class AccessService {
+  static handlerRefreshToken = async (refreshToken: string | undefined) => {
+    if (refreshToken) {
+      const foundToken = await RefreshTokenService.findByRefreshTokenUsed(
+        refreshToken
+      );
+
+      if (foundToken) {
+        const decodeUser = await verifyJWT(refreshToken);
+
+        if (typeof decodeUser !== "string" || decodeUser !== null) {
+          const { userId, email } = decodeUser as JwtPayload;
+
+          await RefreshTokenService.removeByUserId(userId);
+
+          throw new ForbiddenError(
+            "Something wrong happened!! Please re-login"
+          );
+        }
+      }
+
+      const holderToken = await RefreshTokenService.findByRefreshToken(
+        refreshToken
+      );
+
+      if (!holderToken)
+        throw new AuthFailureError("User is not registered or login");
+
+      const decodeUser = await verifyJWT(refreshToken);
+
+      if (typeof decodeUser !== "string" || decodeUser !== null) {
+        const { userId, email } = decodeUser as JwtPayload;
+
+        const foundUser = await findByEmail(email);
+        if (!foundUser)
+          throw new AuthFailureError("User is not registered or login");
+
+        const tokens = await createTokenPair({ userId, email }, privateKey);
+
+        await holderToken.updateOne({
+          $set: {
+            refreshToken: tokens.refreshToken,
+          },
+          $addToSet: {
+            refreshTokensUsed: refreshToken,
+          },
+        });
+
+        return {
+          user: { userId, email },
+          tokens,
+        };
+      }
+    }
+  };
+
   static logout = async (refreshToken: string | undefined) => {
     if (refreshToken) {
       await RefreshTokenService.removeByRefreshToken(refreshToken);

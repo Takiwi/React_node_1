@@ -1,4 +1,4 @@
-import refreshTokenSchema from "../models/refreshToken.model";
+import refreshTokenModel from "../models/refreshToken.model";
 
 class RefreshTokenService {
   static saveRefreshToken = async ({
@@ -13,7 +13,7 @@ class RefreshTokenService {
         update = { refreshTokensUsed: [], refreshToken },
         options = { upsert: true, new: true };
 
-      const tokens = await refreshTokenSchema.findByIdAndUpdate(
+      const tokens = await refreshTokenModel.findByIdAndUpdate(
         filter,
         update,
         options
@@ -26,11 +26,25 @@ class RefreshTokenService {
   };
 
   static findByUserId = async (id: string) => {
-    return await refreshTokenSchema.findOne({ userId: id }).lean();
+    return await refreshTokenModel.findOne({ userId: id }).lean();
   };
 
   static removeByRefreshToken = async (id: string) => {
-    return await refreshTokenSchema.findOneAndDelete();
+    return await refreshTokenModel.findOneAndDelete({ userId: id });
+  };
+
+  static findByRefreshTokenUsed = async (refreshToken: string) => {
+    return await refreshTokenModel
+      .findOne({ refreshTokensUsed: refreshToken })
+      .lean();
+  };
+
+  static removeByUserId = async (id: string) => {
+    return await refreshTokenModel.findByIdAndDelete({ userId: id });
+  };
+
+  static findByRefreshToken = async (refreshToken: string) => {
+    return await refreshTokenModel.findOne({ refreshToken });
   };
 }
 
