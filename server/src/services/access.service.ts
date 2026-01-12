@@ -1,4 +1,3 @@
-import userModel from "../models/user.model";
 import bcrypt from "bcrypt";
 import RefreshTokenService from "./refreshToken.service";
 import { createTokenPair, verifyJWT } from "../auth/authUtils";
@@ -9,8 +8,12 @@ import {
   BadRequestError,
   ForbiddenError,
 } from "../core/error.response";
-import { findByEmail } from "./user.service";
+import useService from "./user.service";
 import { JwtPayload } from "jsonwebtoken";
+import userModel from "../models/user.model";
+import User from "../@types/user";
+import { Role } from "../utils/role";
+import { AuthService } from "./auth.service";
 
 const RoleUser = {
   USER: "USER",
@@ -52,7 +55,7 @@ class AccessService {
       if (typeof decodeUser !== "string" || decodeUser !== null) {
         const { userId, email } = decodeUser as JwtPayload;
 
-        const foundUser = await findByEmail(email);
+        const foundUser = await useService.findByEmail(email);
         if (!foundUser)
           throw new AuthFailureError("User is not registered or login");
 
@@ -97,7 +100,7 @@ class AccessService {
     password: string;
     refreshToken: string | null;
   }) => {
-    const foundUser = await findByEmail(email);
+    const foundUser = await useService.findByEmail(email);
 
     if (!foundUser) throw new BadRequestError("User not registered!");
 
@@ -124,37 +127,29 @@ class AccessService {
     };
   };
 
-  static register = async ({
-    username,
-    email,
-    password,
-  }: {
-    username: string;
-    email: string;
-    password: string;
-  }) => {
+  static register = async ({ username, email, password }: User) => {
     try {
-      const holder = await userModel.findOne({ email }).lean();
+      const existingEmail = await useService.findByEmail(email);
 
-      if (holder) {
+      if (existingEmail) {
         throw new BadRequestError("Error: User is already registered!");
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
 
-      const newUser = await userModel.create({
+      const newUser = await useService.createUser({
         username,
         email,
         password: passwordHash,
-        roles: [RoleUser.USER],
+        roles: [Role.USER],
       });
 
       if (newUser) {
         // create token pair
-        const tokens = await createTokenPair(
-          { userId: newUser._id, email },
-          privateKey
-        );
+        const tokens = await AuthService.createTokenPair({
+          userId: newUser._id,
+          email,
+        });
 
         const tokenHolder = await RefreshTokenService.saveRefreshToken({
           userId: newUser._id.toString(),

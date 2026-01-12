@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { ApiSuccess } from "../types/success";
+import { ApiSuccess } from "../@types/success";
 
 const StatusCode = {
   OK: 200,

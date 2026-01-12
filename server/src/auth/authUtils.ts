@@ -2,9 +2,8 @@ import JWT from "jsonwebtoken";
 import { asyncHandler } from "../helpers/asyncHandler";
 import { NextFunction, Request, Response } from "express";
 import { AuthFailureError, NotFoundError } from "../core/error.response";
-import RefreshTokenService from "../services/refreshToken.service";
 import { publicKey, privateKey } from "../utils/readKey";
-import { AccessTokenPayload } from "../types/payload";
+import { AccessTokenPayload } from "../@types/payload";
 
 const HEADER = {
   API_KEY: "x-api-key",

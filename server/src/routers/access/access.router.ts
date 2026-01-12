@@ -18,6 +18,6 @@ router.use(authentication);
 router.post("/logout", asyncHandler(AccessController.logout));
 
 // handler refresh token
-router.post("/logout", asyncHandler(AccessController.handlerRefreshToken));
+router.post("/refresh-token", asyncHandler(AccessController.handlerRefreshToken));
 
 export default router;

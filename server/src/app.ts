@@ -3,7 +3,7 @@ import cors from "cors";
 import { config } from "dotenv";
 import Database from "./db/mongodb.connect";
 import { router } from "./routers/index";
-import { ApiError } from "./types/error";
+import { ApiError } from "./@types/error";
 
 config();
 
