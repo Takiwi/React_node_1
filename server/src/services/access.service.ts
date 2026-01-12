@@ -4,13 +4,12 @@ import { createTokenPair, verifyJWT } from "../auth/authUtils";
 import { getInfoData } from "../utils";
 import { privateKey } from "../utils/readKey";
 import {
-  AuthFailureError,
+  UnauthorizedError,
   BadRequestError,
   ForbiddenError,
-} from "../core/error.response";
+} from "../utils/appError";
 import useService from "./user.service";
 import { JwtPayload } from "jsonwebtoken";
-import userModel from "../models/user.model";
 import User from "../@types/user";
 import { Role } from "../utils/role";
 import { AuthService } from "./auth.service";
@@ -48,7 +47,7 @@ class AccessService {
       );
 
       if (!holderToken)
-        throw new AuthFailureError("User is not registered or login");
+        throw new UnauthorizedError("User is not registered or login");
 
       const decodeUser = await verifyJWT(refreshToken);
 
@@ -57,7 +56,7 @@ class AccessService {
 
         const foundUser = await useService.findByEmail(email);
         if (!foundUser)
-          throw new AuthFailureError("User is not registered or login");
+          throw new UnauthorizedError("User is not registered or login");
 
         const tokens = await createTokenPair({ userId, email }, privateKey);
 
@@ -106,7 +105,7 @@ class AccessService {
 
     const match = bcrypt.compare(password, foundUser.password);
 
-    if (!match) throw new AuthFailureError("Authentication error");
+    if (!match) throw new UnauthorizedError("Authentication error");
 
     const tokens = await createTokenPair(
       { userId: foundUser._id, email },

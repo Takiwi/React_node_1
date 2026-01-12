@@ -6,7 +6,7 @@ export class ApiResponse {
   static success(
     res: Response,
     message: string = "Success",
-    statusCode: StatusCodes | 200,
+    statusCode: StatusCodes = 200,
     metadata: any = null
   ) {
     return res.status(statusCode).json({
