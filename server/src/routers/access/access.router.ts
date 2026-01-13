@@ -1,7 +1,7 @@
 import express from "express";
 import AccessController from "../../controllers/access.controller";
 import { asyncHandler } from "../../helpers/asyncHandler";
-import { authentication } from "../../auth/authUtils";
+import AuthService from "../../services/auth.service";
 
 const router = express.Router();
 
@@ -12,12 +12,15 @@ router.post("/register", asyncHandler(AccessController.register));
 router.post("/login", asyncHandler(AccessController.login));
 
 // authentication
-router.use(authentication);
+router.use(AuthService.authentication);
 
 // logout
 router.post("/logout", asyncHandler(AccessController.logout));
 
 // handler refresh token
-router.post("/refresh-token", asyncHandler(AccessController.handlerRefreshToken));
+router.post(
+  "/refresh-token",
+  asyncHandler(AccessController.handlerRefreshToken)
+);
 
 export default router;

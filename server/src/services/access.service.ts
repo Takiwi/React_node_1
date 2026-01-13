@@ -1,18 +1,16 @@
 import bcrypt from "bcrypt";
-import RefreshTokenService from "./refreshToken.service";
-import { createTokenPair, verifyJWT } from "../auth/authUtils";
+import RefreshTokenService from "./token.service";
+import AuthService from "../services/auth.service";
 import { getInfoData } from "../utils";
-import { privateKey } from "../utils/readKey";
+import * as UserRepo from "../repositories/user.repository";
 import {
   UnauthorizedError,
   BadRequestError,
   ForbiddenError,
 } from "../utils/appError";
-import useService from "./user.service";
 import { JwtPayload } from "jsonwebtoken";
 import User from "../@types/user";
 import { Role } from "../utils/role";
-import { AuthService } from "./auth.service";
 
 const RoleUser = {
   USER: "USER",
@@ -29,7 +27,7 @@ class AccessService {
       );
 
       if (foundToken) {
-        const decodeUser = await verifyJWT(refreshToken);
+        const decodeUser = await AuthService.verifyJWT(refreshToken);
 
         if (typeof decodeUser !== "string" || decodeUser !== null) {
           const { userId, email } = decodeUser as JwtPayload;
@@ -49,16 +47,17 @@ class AccessService {
       if (!holderToken)
         throw new UnauthorizedError("User is not registered or login");
 
-      const decodeUser = await verifyJWT(refreshToken);
+      const decodeUser = await AuthService.verifyJWT(refreshToken);
 
       if (typeof decodeUser !== "string" || decodeUser !== null) {
-        const { userId, email } = decodeUser as JwtPayload;
+        const { userId, roles } = decodeUser as JwtPayload;
 
-        const foundUser = await useService.findByEmail(email);
+        const foundUser = await UserRepo.findById(userId);
+
         if (!foundUser)
           throw new UnauthorizedError("User is not registered or login");
 
-        const tokens = await createTokenPair({ userId, email }, privateKey);
+        const tokens = await AuthService.createTokenPair({ userId, roles });
 
         await holderToken.updateOne({
           $set: {
@@ -70,7 +69,7 @@ class AccessService {
         });
 
         return {
-          user: { userId, email },
+          user: { userId, roles },
           tokens,
         };
       }
@@ -93,13 +92,13 @@ class AccessService {
   static login = async ({
     email,
     password,
-    refreshToken = null,
+    refreshToken,
   }: {
     email: string;
     password: string;
-    refreshToken: string | null;
+    refreshToken: string;
   }) => {
-    const foundUser = await useService.findByEmail(email);
+    const foundUser = await UserRepo.findByEmail(email);
 
     if (!foundUser) throw new BadRequestError("User not registered!");
 
@@ -107,10 +106,10 @@ class AccessService {
 
     if (!match) throw new UnauthorizedError("Authentication error");
 
-    const tokens = await createTokenPair(
-      { userId: foundUser._id, email },
-      privateKey
-    );
+    const tokens = await AuthService.createTokenPair({
+      userId: foundUser._id,
+      roles: foundUser.roles,
+    });
 
     await RefreshTokenService.saveRefreshToken({
       userId: foundUser._id.toString(),
@@ -128,7 +127,7 @@ class AccessService {
 
   static register = async ({ username, email, password }: User) => {
     try {
-      const existingEmail = await useService.findByEmail(email);
+      const existingEmail = await UserRepo.findByEmail(email);
 
       if (existingEmail) {
         throw new BadRequestError("Error: User is already registered!");
@@ -136,47 +135,21 @@ class AccessService {
 
       const passwordHash = await bcrypt.hash(password, 10);
 
-      const newUser = await useService.createUser({
+      const newUser = await UserRepo.createUser({
         username,
         email,
         password: passwordHash,
         roles: [Role.USER],
       });
 
-      if (newUser) {
-        // create token pair
-        const tokens = await AuthService.createTokenPair({
-          userId: newUser._id,
-          email,
-        });
-
-        const tokenHolder = await RefreshTokenService.saveRefreshToken({
-          userId: newUser._id.toString(),
-          refreshToken: tokens?.refreshToken,
-        });
-
-        if (!tokenHolder) {
-          return {
-            code: 200,
-            metadata: null,
-          };
-        }
-
-        return {
-          code: 201,
-          metadata: {
-            user: getInfoData({
-              fields: ["_id", "username", "email"],
-              object: newUser,
-            }),
-            tokens,
-          },
-        };
-      }
-
       return {
-        code: "200",
-        metadata: null,
+        code: 201,
+        metadata: {
+          user: getInfoData({
+            fields: ["_id", "username", "email"],
+            object: newUser,
+          }),
+        },
       };
     } catch (error) {
       return {
