@@ -9,7 +9,7 @@ class RefreshTokenService {
     refreshToken: string;
   }) => {
     try {
-      const filter = { user: userId },
+      const filter = { _id: userId },
         update = { refreshTokensUsed: [], refreshToken },
         options = { upsert: true, new: true };
 
@@ -29,8 +29,10 @@ class RefreshTokenService {
     return await refreshTokenModel.findOne({ userId: id }).lean();
   };
 
-  static removeByRefreshToken = async (id: string) => {
-    return await refreshTokenModel.findOneAndDelete({ userId: id });
+  static removeByRefreshToken = async (refreshToken: string) => {
+    return await refreshTokenModel.findOneAndDelete({
+      refreshToken: refreshToken,
+    });
   };
 
   static findByRefreshTokenUsed = async (refreshToken: string) => {

@@ -6,7 +6,7 @@ import AuthService from "../../services/auth.service";
 const router = express.Router();
 
 // register
-router.post("/register", asyncHandler(AccessController.register));
+router.post("/register", asyncHandler(AccessController.signup));
 
 // login
 router.post("/login", asyncHandler(AccessController.login));

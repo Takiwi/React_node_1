@@ -1,47 +1,41 @@
 import { Request, Response, NextFunction } from "express";
 import AccessService from "../services/access.service";
-import { ApiResponse } from "../utils/apiResponse";
-import { StatusCodes } from "../utils/statusCodes";
+import BaseController from "./base.controller";
+import { StatusCodes } from "../enums/statusCodes";
+import { BadRequestError } from "../utils/appError";
 
-class AccessController {
+class AccessController extends BaseController {
   handlerRefreshToken = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
-    ApiResponse.success(
-      res,
-      "Get token success",
-      StatusCodes.OK,
-      await AccessService.handlerRefreshToken(req.refreshToken)
-    );
+    this.handleRequest(req, res, next, StatusCodes.OK, async () => {
+      if (!req.refreshToken) throw new BadRequestError();
+      return await AccessService.handlerRefreshToken(req.refreshToken);
+    });
   };
 
   logout = async (req: Request, res: Response, next: NextFunction) => {
-    ApiResponse.success(
-      res,
-      "Logout success",
-      StatusCodes.OK,
-      await AccessService.logout(req.refreshToken)
-    );
+    this.handleRequest(req, res, next, StatusCodes.OK, async () => {
+      console.log("Refresh token::::::", req.refreshToken);
+
+      await AccessService.logout(req.refreshToken);
+
+      return { message: "Logged out successfully" };
+    });
   };
 
   login = async (req: Request, res: Response, next: NextFunction) => {
-    ApiResponse.success(
-      res,
-      "Login success",
-      StatusCodes.OK,
-      await AccessService.login(req.body)
-    );
+    this.handleRequest(req, res, next, StatusCodes.OK, async () => {
+      return await AccessService.login(req.body);
+    });
   };
 
-  register = async (req: Request, res: Response, next: NextFunction) => {
-    ApiResponse.success(
-      res,
-      "Registered Ok",
-      StatusCodes.CREATED,
-      await AccessService.register(req.body)
-    );
+  signup = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, StatusCodes.CREATED, async () => {
+      return await AccessService.signup(req.body);
+    });
   };
 }
 

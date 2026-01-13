@@ -1,4 +1,4 @@
-import { Role } from "../utils/role";
+import { Role } from "../enums/role";
 
 interface User {
   username: string;

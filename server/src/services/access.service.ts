@@ -10,14 +10,7 @@ import {
 } from "../utils/appError";
 import { JwtPayload } from "jsonwebtoken";
 import User from "../@types/user";
-import { Role } from "../utils/role";
-
-const RoleUser = {
-  USER: "USER",
-  WRITER: "WRITER",
-  EDITOR: "EDITOR",
-  ADMIN: "ADMIN",
-};
+import { Role } from "../enums/role";
 
 class AccessService {
   static handlerRefreshToken = async (refreshToken: string | undefined) => {
@@ -92,11 +85,9 @@ class AccessService {
   static login = async ({
     email,
     password,
-    refreshToken,
   }: {
     email: string;
     password: string;
-    refreshToken: string;
   }) => {
     const foundUser = await UserRepo.findByEmail(email);
 
@@ -125,7 +116,7 @@ class AccessService {
     };
   };
 
-  static register = async ({ username, email, password }: User) => {
+  static signup = async ({ username, email, password }: User) => {
     try {
       const existingEmail = await UserRepo.findByEmail(email);
 
@@ -142,15 +133,7 @@ class AccessService {
         roles: [Role.USER],
       });
 
-      return {
-        code: 201,
-        metadata: {
-          user: getInfoData({
-            fields: ["_id", "username", "email"],
-            object: newUser,
-          }),
-        },
-      };
+      return newUser;
     } catch (error) {
       return {
         code: "xxx",

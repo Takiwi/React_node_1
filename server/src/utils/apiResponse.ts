@@ -1,16 +1,17 @@
-import { ReasonPhrases } from "./reasonPhrases";
-import { StatusCodes } from "./statusCodes";
+import { ReasonPhrases } from "../enums/reasonPhrases";
+import { StatusCodes } from "../enums/statusCodes";
 import { Response } from "express";
 
 export class ApiResponse {
   static success(
     res: Response,
-    message: string = "Success",
+    metadata: any = null,
     statusCode: StatusCodes = 200,
-    metadata: any = null
+    message: string = "Success"
   ) {
     return res.status(statusCode).json({
       success: true,
+      statusCode,
       message,
       metadata,
     });

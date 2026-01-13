@@ -1,7 +1,7 @@
-import { ReasonPhrases } from "./reasonPhrases";
-import { StatusCodes } from "./statusCodes";
+import { ReasonPhrases } from "../enums/reasonPhrases";
+import { StatusCodes } from "../enums/statusCodes";
 
-class AppError extends Error {
+export class AppError extends Error {
   readonly statusCode: StatusCodes;
   readonly code: number;
   readonly reason: ReasonPhrases;
@@ -22,34 +22,26 @@ class AppError extends Error {
   }
 }
 
-class NotFoundError extends AppError {
+export class NotFoundError extends AppError {
   constructor(message = "Resource not found") {
     super(message, StatusCodes.NOT_FOUND, 404, ReasonPhrases.NOT_FOUND);
   }
 }
 
-class UnauthorizedError extends AppError {
+export class UnauthorizedError extends AppError {
   constructor(message = "Unauthorized") {
     super(message, StatusCodes.UNAUTHORIZED, 401, ReasonPhrases.UNAUTHORIZED);
   }
 }
 
-class ForbiddenError extends AppError {
+export class ForbiddenError extends AppError {
   constructor(message = "Unauthorized") {
     super(message, StatusCodes.FORBIDDEN, 403, ReasonPhrases.FORBIDDEN);
   }
 }
 
-class BadRequestError extends AppError {
-  constructor(message = "Unauthorized") {
+export class BadRequestError extends AppError {
+  constructor(message = "Conflict") {
     super(message, StatusCodes.CONFLICT, 409, ReasonPhrases.CONFLICT);
   }
 }
-
-export {
-  AppError,
-  NotFoundError,
-  UnauthorizedError,
-  ForbiddenError,
-  BadRequestError,
-};

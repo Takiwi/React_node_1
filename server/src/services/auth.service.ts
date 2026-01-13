@@ -4,8 +4,8 @@ import { privateKey, publicKey } from "../utils/readKey";
 import { asyncHandler } from "../helpers/asyncHandler";
 import { Request, Response, NextFunction } from "express";
 import { UnauthorizedError } from "../utils/appError";
-import { HEADER } from "../utils/Header";
-import * as ApiKey from "../repositories/user.repository";
+import { HEADER } from "../enums/Header";
+import * as ApiKey from "../repositories/apiKey.repository";
 
 export default class AuthService {
   static createTokenPair = async (payload: AccessTokenPayload) => {
@@ -34,11 +34,11 @@ export default class AuthService {
       const userId = req.get(HEADER.CLIENT_ID);
       if (!userId) throw new UnauthorizedError("Invalid Request");
 
-      const accessToken = req.get(HEADER.AUTHORIZATION);
-      if (!accessToken) throw new UnauthorizedError("Invalid Request");
+      const refreshToken = req.get(HEADER.AUTHORIZATION);
+      if (!refreshToken) throw new UnauthorizedError("Invalid Request");
 
       try {
-        const decodeUser = JWT.verify(accessToken, publicKey);
+        const decodeUser = JWT.verify(refreshToken, publicKey);
         if (typeof decodeUser === "string")
           throw new UnauthorizedError("Invalid Request");
 
@@ -46,6 +46,8 @@ export default class AuthService {
 
         if (userId !== payload.userId)
           throw new UnauthorizedError("Invalid Request");
+
+        req.refreshToken = refreshToken;
 
         return next();
       } catch (error) {
