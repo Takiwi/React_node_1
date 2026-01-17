@@ -1,5 +1,11 @@
+import { RegisterForm } from "./features/auth/components/RegisterForm";
+
 function App() {
-  return <h1 className="text-3xl font-bold underline">Hello world!</h1>;
+  return (
+    <>
+      <RegisterForm></RegisterForm>
+    </>
+  );
 }
 
 export default App;
