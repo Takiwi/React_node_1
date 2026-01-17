@@ -1,28 +1,29 @@
-import type { RegisterPayload } from "../../../@types/accessPayload";
-import banner from "../../../assets/images/banner.jpg";
-import AccessService from "../services/access.service";
+import { Link } from "react-router-dom";
+import banner from "../assets/images/banner.jpg";
+import type { LoginPayload } from "../@types/accessPayload";
+import AuthApi from "../api/auth.api";
 
-export function RegisterForm() {
+export default function Login() {
   const handlerSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
     const raw = Object.fromEntries(formData.entries());
 
-    const payload: RegisterPayload = {
-      username: raw.username as string,
+    const payload: LoginPayload = {
       email: raw.email as string,
       password: raw.password as string,
+      accessToken: "",
     };
 
-    AccessService.signup(payload);
+    AuthApi.login(payload);
   };
 
   return (
     <>
       <div className="grid grid-cols-2">
         <div className="flex flex-col content-center items-center justify-center">
-          <h1 className="text-3xl font-semibold mb-6">Register</h1>
+          <h1 className="text-3xl font-semibold mb-6">Login</h1>
 
           <form
             action="/signup"
@@ -30,20 +31,6 @@ export function RegisterForm() {
             className="flex flex-col gap-2 p-6 w-100"
             onSubmit={handlerSubmit}
           >
-            <div>
-              <label htmlFor="username" className="font-medium">
-                Name
-              </label>
-              <br />
-              <input
-                type="text"
-                name="username"
-                id="username"
-                className="border rounded-md mt-1 w-full p-1 pl-3 outline-none"
-                placeholder="Enter your name"
-              />
-            </div>
-
             <div>
               <label htmlFor="email" className="font-medium">
                 Email
@@ -76,15 +63,15 @@ export function RegisterForm() {
               className="bg-blue-600 text-white font-semibold border rounded-md py-2 text-xl cursor-pointer mt-2"
               type="submit"
             >
-              Sign up
+              Sign in
             </button>
           </form>
 
           <div>
-            Have a account?
-            <a href="/login" className="underline">
-              Login
-            </a>
+            Don't have an account?
+            <Link to="/register" className="underline">
+              Register
+            </Link>
           </div>
         </div>
 

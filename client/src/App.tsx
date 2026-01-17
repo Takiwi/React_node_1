@@ -1,11 +1,7 @@
-import { RegisterForm } from "./features/auth/components/RegisterForm";
+import AppRoutes from "./routes";
 
 function App() {
-  return (
-    <>
-      <RegisterForm></RegisterForm>
-    </>
-  );
+  return <AppRoutes></AppRoutes>;
 }
 
 export default App;
