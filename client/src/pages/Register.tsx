@@ -1,10 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { RegisterPayload } from "../@types/accessPayload";
 import banner from "../assets/images/banner.jpg";
 import AuthApi from "../api/auth.api";
+import { useState } from "react";
+import { AxiosError } from "axios";
+import type { ApiErrorResponse } from "../@types/api";
 
 export default function Register() {
-  const handlerSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handlerSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
@@ -16,7 +22,14 @@ export default function Register() {
       password: raw.password as string,
     };
 
-    AuthApi.register(payload);
+    try {
+      await AuthApi.register(payload);
+      // Nếu thành công mới navigate
+      navigate("/login");
+    } catch (err) {
+      const error = err as AxiosError<ApiErrorResponse>;
+      setError(error.response?.data.message || "Lỗi không xác định");
+    }
   };
 
   return (
@@ -25,8 +38,10 @@ export default function Register() {
         <div className="flex flex-col content-center items-center justify-center">
           <h1 className="text-3xl font-semibold mb-6">Register</h1>
 
+          {error && <h1 className="text-red-600 text-xl">{error}</h1>}
+
           <form
-            action="/signup"
+            action="/register"
             method="post"
             className="flex flex-col gap-2 p-6 w-100"
             onSubmit={handlerSubmit}

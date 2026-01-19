@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiResponse } from "../utils/apiResponse";
+import ApiResponse from "../utils/apiResponse";
 import { StatusCodes } from "../enums/statusCodes";
 
 export default class BaseController {
@@ -8,9 +8,10 @@ export default class BaseController {
     res: Response,
     next: NextFunction,
     statusCode: StatusCodes,
-    action: () => Promise<any>
+    action: () => Promise<any>,
   ): Promise<void> {
     const result = await action();
+
     ApiResponse.success(res, result, statusCode);
   }
 }

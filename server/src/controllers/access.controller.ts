@@ -8,16 +8,16 @@ class AccessController extends BaseController {
   handlerRefreshToken = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
-    this.handleRequest(req, res, next, StatusCodes.OK, async () => {
+    await this.handleRequest(req, res, next, StatusCodes.OK, async () => {
       if (!req.refreshToken) throw new BadRequestError();
       return await AccessService.handlerRefreshToken(req.refreshToken);
     });
   };
 
   logout = async (req: Request, res: Response, next: NextFunction) => {
-    this.handleRequest(req, res, next, StatusCodes.OK, async () => {
+    await this.handleRequest(req, res, next, StatusCodes.OK, async () => {
       console.log("Refresh token::::::", req.refreshToken);
 
       await AccessService.logout(req.refreshToken);
@@ -27,13 +27,13 @@ class AccessController extends BaseController {
   };
 
   login = async (req: Request, res: Response, next: NextFunction) => {
-    this.handleRequest(req, res, next, StatusCodes.OK, async () => {
+    await this.handleRequest(req, res, next, StatusCodes.OK, async () => {
       return await AccessService.login(req.body);
     });
   };
 
   signup = async (req: Request, res: Response, next: NextFunction) => {
-    this.handleRequest(req, res, next, StatusCodes.CREATED, async () => {
+    await this.handleRequest(req, res, next, StatusCodes.CREATED, async () => {
       return await AccessService.signup(req.body);
     });
   };

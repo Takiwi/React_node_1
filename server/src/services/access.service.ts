@@ -15,9 +15,8 @@ import { Role } from "../enums/role";
 class AccessService {
   static handlerRefreshToken = async (refreshToken: string | undefined) => {
     if (refreshToken) {
-      const foundToken = await RefreshTokenService.findByRefreshTokenUsed(
-        refreshToken
-      );
+      const foundToken =
+        await RefreshTokenService.findByRefreshTokenUsed(refreshToken);
 
       if (foundToken) {
         const decodeUser = await AuthService.verifyJWT(refreshToken);
@@ -28,14 +27,13 @@ class AccessService {
           await RefreshTokenService.removeByUserId(userId);
 
           throw new ForbiddenError(
-            "Something wrong happened!! Please re-login"
+            "Something wrong happened!! Please re-login",
           );
         }
       }
 
-      const holderToken = await RefreshTokenService.findByRefreshToken(
-        refreshToken
-      );
+      const holderToken =
+        await RefreshTokenService.findByRefreshToken(refreshToken);
 
       if (!holderToken)
         throw new UnauthorizedError("User is not registered or login");
@@ -117,30 +115,23 @@ class AccessService {
   };
 
   static signup = async ({ username, email, password }: User) => {
-    try {
-      const existingEmail = await UserRepo.findByEmail(email);
+    const existingEmail = await UserRepo.findByEmail(email);
 
-      if (existingEmail) {
-        throw new BadRequestError("Error: User is already registered!");
-      }
-
-      const passwordHash = await bcrypt.hash(password, 10);
-
-      const newUser = await UserRepo.createUser({
-        username,
-        email,
-        password: passwordHash,
-        roles: [Role.USER],
-      });
-
-      return newUser;
-    } catch (error) {
-      return {
-        code: "xxx",
-        message: "1 - " + error,
-        status: "error",
-      };
+    if (existingEmail) {
+      throw new BadRequestError("Error: User is already registered!");
     }
+
+    const salt = 10;
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const newUser = await UserRepo.createUser({
+      username,
+      email,
+      password: passwordHash,
+      roles: [Role.USER],
+    });
+
+    return newUser;
   };
 }
 

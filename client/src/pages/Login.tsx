@@ -26,7 +26,7 @@ export default function Login() {
           <h1 className="text-3xl font-semibold mb-6">Login</h1>
 
           <form
-            action="/signup"
+            action="/login"
             method="post"
             className="flex flex-col gap-2 p-6 w-100"
             onSubmit={handlerSubmit}

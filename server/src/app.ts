@@ -3,7 +3,8 @@ import cors from "cors";
 import { config } from "dotenv";
 import Database from "./db/mongodb.connect";
 import { router } from "./routers/index";
-import { ApiError } from "./@types/error";
+import { AppError, NotFoundError } from "./utils/appError";
+// import { ApiError } from "./@types/error";
 
 config();
 
@@ -24,12 +25,11 @@ app.use("/", router);
 
 // handling error
 app.use((req, res, next) => {
-  const error: ApiError = { message: "Not Found", status: 404 };
-  next(error);
+  next(new NotFoundError());
 });
 
-app.use((error: ApiError, req: Request, res: Response, next: NextFunction) => {
-  const statusCode = error.status || 500;
+app.use((error: AppError, req: Request, res: Response, next: NextFunction) => {
+  const statusCode = error.statusCode || 500;
   return res.status(statusCode).json({
     status: "error",
     code: statusCode,

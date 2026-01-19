@@ -1,14 +1,14 @@
 import type { LoginPayload, RegisterPayload } from "../@types/accessPayload";
-import { ROUTES } from "../routes/routes.constant";
 import api from "./axios";
 
 export default class AuthApi {
   static register = async (payload: RegisterPayload) => {
-    return await fetch(ROUTES.REGISTER, {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const res = await api.post(
+      import.meta.env.VITE_API_URL + "/register",
+      payload,
+    );
+
+    return res.data;
   };
 
   static login = async (payload: LoginPayload) => {

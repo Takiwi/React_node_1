@@ -2,12 +2,12 @@ import { ReasonPhrases } from "../enums/reasonPhrases";
 import { StatusCodes } from "../enums/statusCodes";
 import { Response } from "express";
 
-export class ApiResponse {
+export default class ApiResponse {
   static success(
     res: Response,
     metadata: any = null,
     statusCode: StatusCodes = 200,
-    message: string = "Success"
+    message: string = "Success",
   ) {
     return res.status(statusCode).json({
       success: true,
@@ -20,9 +20,9 @@ export class ApiResponse {
   static error(
     res: Response,
     message: string,
-    statusCode: StatusCodes = 400,
-    reasonPhrases: ReasonPhrases,
-    code?: string
+    statusCode: StatusCodes = 500,
+    reasonPhrases: ReasonPhrases | string = ReasonPhrases.INTERNAL_SERVER_ERROR,
+    code?: string,
   ) {
     return res.status(statusCode).json({
       success: false,
