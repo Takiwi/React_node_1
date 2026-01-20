@@ -24,10 +24,12 @@ export default function Register() {
 
     try {
       await AuthApi.register(payload);
+
       // Nếu thành công mới navigate
       navigate("/login");
     } catch (err) {
       const error = err as AxiosError<ApiErrorResponse>;
+
       setError(error.response?.data.message || "Lỗi không xác định");
     }
   };

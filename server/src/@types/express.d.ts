@@ -12,7 +12,7 @@ declare global {
         _id: Types.ObjectId;
         __v?: number;
       };
-      refreshToken?: string;
+      accessToken?: string;
     }
   }
 }

@@ -8,10 +8,11 @@ export default class BaseController {
     res: Response,
     next: NextFunction,
     statusCode: StatusCodes,
+    message: string = "Success",
     action: () => Promise<any>,
   ): Promise<void> {
     const result = await action();
 
-    ApiResponse.success(res, result, statusCode);
+    ApiResponse.success(res, result, statusCode, message);
   }
 }

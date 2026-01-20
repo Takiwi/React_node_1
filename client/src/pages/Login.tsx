@@ -1,10 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import banner from "../assets/images/banner.jpg";
 import type { LoginPayload } from "../@types/accessPayload";
 import AuthApi from "../api/auth.api";
+import { useState } from "react";
+import type { ApiErrorResponse } from "../@types/api";
+import type { AxiosError } from "axios";
 
 export default function Login() {
-  const handlerSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handlerSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
@@ -13,10 +19,20 @@ export default function Login() {
     const payload: LoginPayload = {
       email: raw.email as string,
       password: raw.password as string,
-      accessToken: "",
     };
 
-    AuthApi.login(payload);
+    try {
+      const res = await AuthApi.login(payload);
+
+      localStorage.setItem("accessToken", res.metadata.tokens.accessToken);
+      localStorage.setItem("refreshToken", res.metadata.tokens.refreshToken);
+
+      navigate("/");
+    } catch (err) {
+      const error = err as AxiosError<ApiErrorResponse>;
+
+      setError(error.response?.data.message || "Lỗi không xác định");
+    }
   };
 
   return (
@@ -24,6 +40,8 @@ export default function Login() {
       <div className="grid grid-cols-2">
         <div className="flex flex-col content-center items-center justify-center">
           <h1 className="text-3xl font-semibold mb-6">Login</h1>
+
+          {error && <h1 className="text-red-600 text-xl">{error}</h1>}
 
           <form
             action="/login"

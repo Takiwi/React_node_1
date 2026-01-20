@@ -19,7 +19,7 @@ class AccessService {
         await RefreshTokenService.findByRefreshTokenUsed(refreshToken);
 
       if (foundToken) {
-        const decodeUser = await AuthService.verifyJWT(refreshToken);
+        const decodeUser = AuthService.verifyJWT(refreshToken);
 
         if (typeof decodeUser !== "string" || decodeUser !== null) {
           const { userId, email } = decodeUser as JwtPayload;
@@ -38,7 +38,7 @@ class AccessService {
       if (!holderToken)
         throw new UnauthorizedError("User is not registered or login");
 
-      const decodeUser = await AuthService.verifyJWT(refreshToken);
+      const decodeUser = AuthService.verifyJWT(refreshToken);
 
       if (typeof decodeUser !== "string" || decodeUser !== null) {
         const { userId, roles } = decodeUser as JwtPayload;

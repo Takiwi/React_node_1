@@ -14,13 +14,16 @@ router.post("/login", asyncHandler(AccessController.login));
 // authentication
 router.use(AuthService.authentication);
 
+// auth tokens
+router.post("/me", asyncHandler(AccessController.me));
+
 // logout
 router.post("/logout", asyncHandler(AccessController.logout));
 
 // handler refresh token
 router.post(
   "/refresh-token",
-  asyncHandler(AccessController.handlerRefreshToken)
+  asyncHandler(AccessController.handlerRefreshToken),
 );
 
 export default router;

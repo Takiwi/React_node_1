@@ -6,6 +6,7 @@ import { Request, Response, NextFunction } from "express";
 import { UnauthorizedError } from "../utils/appError";
 import { HEADER } from "../enums/Header";
 import * as ApiKey from "../repositories/apiKey.repository";
+import userModel from "../models/user.model";
 
 export default class AuthService {
   static createTokenPair = async (payload: AccessTokenPayload) => {
@@ -31,33 +32,35 @@ export default class AuthService {
 
   static authentication = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-      const userId = req.get(HEADER.CLIENT_ID);
-      if (!userId) throw new UnauthorizedError("Invalid Request");
+      const authHeader = req.get(HEADER.AUTHORIZATION);
 
-      const refreshToken = req.get(HEADER.AUTHORIZATION);
-      if (!refreshToken) throw new UnauthorizedError("Invalid Request");
+      if (!authHeader) throw new UnauthorizedError("Missing token");
 
-      try {
-        const decodeUser = JWT.verify(refreshToken, publicKey);
-        if (typeof decodeUser === "string")
-          throw new UnauthorizedError("Invalid Request");
+      const parts = authHeader.split(" ");
+      if (parts.length !== 2 || parts[0] !== "Bearer")
+        throw new UnauthorizedError("Invalid token format");
 
-        const payload = decodeUser as AccessTokenPayload;
+      console.log("Access token:::::", parts[1]);
 
-        if (userId !== payload.userId)
-          throw new UnauthorizedError("Invalid Request");
+      const decodeUser = JWT.verify(parts[1], publicKey);
 
-        req.refreshToken = refreshToken;
+      if (typeof decodeUser === "string")
+        throw new UnauthorizedError("Invalid Request");
 
-        return next();
-      } catch (error) {
-        throw error;
-      }
-    }
+      const payload = decodeUser as AccessTokenPayload;
+
+      const existingUser = userModel.findById(payload.userId);
+
+      if (!existingUser) throw new UnauthorizedError("User not found");
+
+      req.accessToken = parts[1];
+
+      return next();
+    },
   );
 
-  static verifyJWT = async (token: string) => {
-    return await JWT.verify(token, privateKey);
+  static verifyJWT = (token: string) => {
+    return JWT.verify(token, privateKey);
   };
 
   static apiKey = async (req: Request, res: Response, next: NextFunction) => {

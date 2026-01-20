@@ -1,26 +1,26 @@
 import type { LoginPayload, RegisterPayload } from "../@types/accessPayload";
+import type { ApiResponse } from "../@types/api";
 import api from "./axios";
+class AuthApi {
+  API_URL = import.meta.env.VITE_API_URL;
 
-export default class AuthApi {
-  static register = async (payload: RegisterPayload) => {
-    const res = await api.post(
-      import.meta.env.VITE_API_URL + "/register",
-      payload,
-    );
+  register = async (payload: RegisterPayload) => {
+    const res = await api.post(this.API_URL + "/register", payload);
 
     return res.data;
   };
 
-  static login = async (payload: LoginPayload) => {
-    api.interceptors.request.use(
-      (config) => {
-        config.headers.Authorization = `Bearer ${payload.accessToken}`;
+  login = async (payload: LoginPayload) => {
+    const res = await api.post<ApiResponse>(this.API_URL + "/login", payload);
 
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      },
-    );
+    return res.data;
+  };
+
+  auth = async (accessToken: string) => {
+    const res = await api.post(this.API_URL + "/me", accessToken);
+
+    return res.data;
   };
 }
+
+export default new AuthApi();

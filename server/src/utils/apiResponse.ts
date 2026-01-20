@@ -7,7 +7,7 @@ export default class ApiResponse {
     res: Response,
     metadata: any = null,
     statusCode: StatusCodes = 200,
-    message: string = "Success",
+    message: string,
   ) {
     return res.status(statusCode).json({
       success: true,
